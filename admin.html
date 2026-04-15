@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin - Quản lý VHAT</title>
+    <title>Admin - Quản lý VDC</title>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
     <style>
@@ -17,41 +17,40 @@
 </head>
 <body>
 <div class="admin-card">
-    <h2>QUẢN TRỊ HỆ THỐNG</h2>
+    <h2>HỆ THỐNG QUẢN TRỊ VDC</h2>
     <div class="section">
-        <label><b>Tạo phiên khảo sát mới:</b></label>
-        <input type="text" id="factoryName" placeholder="Nhập tên nhà máy mới">
-        <button class="btn-blue" onclick="setupNew()">TẠO MỚI (XÓA CŨ)</button>
+        <label><b>Tên đơn vị khảo sát:</b></label>
+        <input type="text" id="factoryName" placeholder="VD: Nhiệt điện Vĩnh Tân 2">
+        <button class="btn-blue" onclick="setupNew()">TẠO PHIÊN MỚI (LÀM SẠCH)</button>
     </div>
     <div class="section">
         <p id="info" style="font-weight:bold; color:#01579b;">Đang tải...</p>
         <button class="btn-gray" onclick="archive()">LƯU TRỮ LỊCH SỬ</button>
-        <button class="btn-red" onclick="clearTemp()">XÓA TẠM DỮ LIỆU HIỆN TẠI</button>
+        <button class="btn-red" onclick="clearTemp()">XÓA DỮ LIỆU TẠM</button>
     </div>
-    <input type="password" id="adminPass" placeholder="Mật khẩu (123456)">
+    <input type="password" id="adminPass" placeholder="Mật khẩu bảo vệ">
 </div>
 <script>
     const firebaseConfig = { apiKey: "AIzaSyALxXDNbFdXkI7XvHqiSNb1jnKjj0CbYnE", authDomain: "qldd-2025.firebaseapp.com", databaseURL: "https://qldd-2025-default-rtdb.firebaseio.com", projectId: "qldd-2025", storageBucket: "qldd-2025.firebasestorage.app", messagingSenderId: "84684010166", appId: "1:84684010166:web:bd9c3b5ae4227ee2812c17", measurementId: "G-7E5BDTCSEZ" };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    db.ref('active_session/name').on('value', snap => { document.getElementById('info').innerText = "Hiện tại: " + (snap.val()||"N/A"); });
+    db.ref('active_session/name').on('value', snap => { document.getElementById('info').innerText = "Hiện tại: " + (snap.val()||"Chưa có"); });
 
     function auth() { return document.getElementById('adminPass').value === "123456"; }
 
     function setupNew() {
-        if(!auth()) return;
+        if(!auth()) return alert("Sai mật khẩu");
         const name = document.getElementById('factoryName').value;
-        if(!name) return;
+        if(!name) return alert("Nhập tên nhà máy");
         db.ref('surveys').remove();
         db.ref('active_session').set({ name: name, time: Date.now() });
-        alert("Đã mở phiên mới cho " + name);
+        alert("Đã bắt đầu khảo sát cho " + name);
     }
 
     function clearTemp() {
-        if(!auth() || !confirm("Xóa tạm dữ liệu?")) return;
+        if(!auth() || !confirm("Xóa dữ liệu hiện tại?")) return;
         db.ref('surveys').remove();
-        alert("Đã làm sạch dữ liệu hiện tại.");
     }
 
     function archive() {
@@ -60,7 +59,7 @@
             if(!snap.val()) return alert("Không có dữ liệu!");
             db.ref('active_session/name').once('value', n => {
                 db.ref('archives').push({ factory: n.val(), data: snap.val(), time: Date.now() });
-                alert("Đã lưu vào kho lưu trữ.");
+                alert("Đã lưu trữ thành công.");
             });
         });
     }
